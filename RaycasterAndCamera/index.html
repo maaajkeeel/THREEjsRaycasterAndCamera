@@ -1,0 +1,249 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Testy</title>
+    <script src="three.js"></script>
+    <style>
+        *, body {
+            overflow: hidden;
+            margin: 0;
+        }
+            </style>
+    <script>
+        var klik = false;
+        window.addEventListener("load", function () {
+            load_funkcja();
+        });
+        function load_funkcja() {
+            var obj = new Object();
+            
+            var klawisz = 0;
+            var tab = new Array(0, 0, 0, 0);
+            var scene = new THREE.Scene();
+          
+           
+            var camera = new THREE.PerspectiveCamera(
+                45, //Field Of View (FOV) 
+                this.innerWidth / this.innerHeight, // proporcje widoku
+                0.1, //min renderowana odległość
+                10000 //max renderowana odległość
+                );
+
+
+            var renderer = new THREE.WebGLRenderer();
+            renderer.autoClear = false;
+            renderer.setClearColor(0x000000);
+            renderer.setSize(this.innerWidth, this.innerHeight);
+
+            //--------------------------------------------------------------------
+
+
+            var axis = new THREE.AxisHelper(20);
+            scene.add(axis);
+
+            var materials = [];
+
+            materials.push(new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('mats/c.jpg') }));
+            materials.push(new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('mats/c.jpg') }));
+            materials.push(new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('mats/a.jpg') }));
+            materials.push(new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('mats/a.jpg') }));
+            materials.push(new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('mats/b.jpg') }));
+            materials.push(new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('mats/b.jpg') }));
+
+            var faceMaterial = new THREE.MeshFaceMaterial(materials);
+
+
+            var boxGeometry = new THREE.CubeGeometry(8, 1, 4, 1, 1, 1);
+
+            for (var i = 0; i <3 ; i++) {
+                for (var j = 0; j < 3; j++) {
+                    var mesh = new THREE.Mesh(boxGeometry, faceMaterial);
+                    mesh.position.set(i * 8 - 8, 0,j * 4 - 4);
+                    scene.add(mesh);
+                }
+            }
+            
+            console.log(JSON.stringify(scene.children.length));
+            document.getElementById("mainDiv").appendChild(renderer.domElement);
+
+            camera.position.x = -200;
+            camera.position.y = 200;
+            camera.position.z = -200;
+
+            camera.lookAt(scene.position);
+            animateScene();
+            function animateScene() {
+                //mesh.rotation.y += rtRg.value/1;
+                //var x = document.getElementById("scRg").value;
+                //mesh.scale.set(x, x, x);
+                camera.fov = fovRg.value;
+               
+                var angle = 0.1;
+                if (!klik) {
+                    if (tab[2] == 1) {
+                        //lewo 
+                        var x = camera.position.x * Math.cos(angle) - camera.position.z * Math.sin(angle);
+
+                        var z = camera.position.x * Math.sin(angle) + camera.position.z * Math.cos(angle);
+                        camera.position.x = x;
+                        camera.position.z = z;
+
+                    } if (tab[3] == 1) {
+                        //prawo
+                        var x = camera.position.x * Math.cos(-angle) - camera.position.z * Math.sin(-angle);
+
+                        var z = camera.position.x * Math.sin(-angle) + camera.position.z * Math.cos(-angle);
+                        camera.position.x = x;
+                        camera.position.z = z;
+
+                    } if (tab[0] == 1) {
+                        camera.position.y += 10;
+
+                        //gora
+                    } if (tab[1] == 1) {
+                        //dol
+                        camera.position.y -= 10;
+                    }
+                } else {
+                    var przesun = 1;
+                    if (klawisz == 65)
+                        obj.position.x += przesun;
+                    else if (klawisz == 68)
+                        obj.position.x -= przesun;
+                    else if (klawisz == 87)
+                        obj.position.y += przesun;
+                    else if (klawisz == 83)
+                        obj.position.y -= przesun;
+                    else if (klawisz == 69)
+                        obj.position.z += przesun;
+                    else if (klawisz == 81)
+                        obj.position.z -= przesun;
+                    klawisz = 0;
+                }
+               
+                    
+                
+                camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+
+                camera.updateProjectionMatrix();
+                requestAnimationFrame(animateScene);
+
+                renderer.render(scene, camera);
+
+            };
+          
+            document.addEventListener("keydown", onKeyDown, false); // naciśnięcie dowolnego klawisza
+            document.addEventListener("keyup", onKeyUp, false); //zwolnienie dowolnego klawisza
+            //gora,dol,lewo,prawo
+           
+
+            function onKeyDown(event) {
+
+                var keyCode = event.which; // kod klawisza
+
+                console.log(keyCode);
+                if (!klik) {
+                    switch (keyCode) {
+
+                        case 65:
+                            tab[2] = 1;
+                            //a
+                            break;
+                        case 87:
+                            tab[0] = 1;
+                            //w
+                            break;
+                        case 83:
+                            tab[1] = 1;
+                            //s
+                            break;
+                        case 68:
+                            tab[3] = 1;
+                            //d
+                            break;
+                    }
+
+                } else {
+                    if (keyCode == 27)
+                        klik = false;
+                    klawisz = keyCode;
+                }
+
+            }
+            function onKeyUp(event) {
+                var keyCode = event.which; // kod klawisza
+                if (!klik) {
+                    switch (keyCode) {
+
+                        case 65:
+                            tab[2] = 0;
+                            //a
+                            break;
+                        case 87:
+                            tab[0] = 0;
+                            //w
+                            break;
+                        case 83:
+                            tab[1] = 0;
+                            //s
+                            break;
+                        case 68:
+                            tab[3] = 0;
+                            //d
+                            break;
+                    }
+                    
+                }
+                if (keyCode == 27)
+                    klik = false;
+
+            }
+            
+
+            var raycaster = new THREE.Raycaster(); // obiekt symulujący "rzucanie" promieni
+            var mouseVector = new THREE.Vector2() // wektor (x,y) wykorzystany bedzie do określenie pozycji myszy na ekranie
+            
+            document.addEventListener("mousedown", onMouseDown, false);
+            function onMouseDown(event) {
+                //pozycja myszy zostaje przeliczona na wartości 0-1, wymagane przez raycaster
+
+                mouseVector.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouseVector.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+
+                // szukamy punktów wspólnych "promienia" i obiektu 3D 
+
+                raycaster.setFromCamera(mouseVector, camera);
+
+                //intersects - tablica obiektów w które "trafia" nasz "promień" wysyłany z kamery
+
+                var intersects = raycaster.intersectObjects(scene.children);
+
+                
+
+                if (intersects.length > 0) {
+
+                    // zerowy czyli najbliższy kamery jest tek którego potrzebujemy
+                    klik = true;
+                    obj = intersects[0].object;
+
+                }
+
+
+
+            }
+        }
+        
+
+    </script>
+</head>
+<body>
+    <div id="mainDiv" style="z-index: 10;"></div>
+    <div id="leftPanel" style="position: fixed;top:0; right: 0; width: 15%; background-color: black; color: white; min-height: 100%; z-index: 1000000;">
+        <label style="display:block">Camera FOV</label>
+        <input style="display:block" value="45" step="0.01"  type="range" min="0" max="100" id="fovRg" />
+
+    </div>
+</body>
+</html>
